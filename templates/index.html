@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cold Email Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            max-width: 700px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #0077b5;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .input-section {
+            margin-bottom: 25px;
+        }
+
+        .input-section label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .input-section .hint {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: normal;
+        }
+
+        .url-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .url-input, .product-input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .url-input:focus, .product-input:focus {
+            outline: none;
+            border-color: #0077b5;
+            box-shadow: 0 0 0 3px rgba(0, 119, 181, 0.1);
+        }
+
+        .url-input.valid {
+            border-color: #28a745;
+        }
+
+        .url-input.invalid {
+            border-color: #dc3545;
+        }
+
+        .char-counter {
+            text-align: right;
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .char-counter.warning {
+            color: #ffc107;
+        }
+
+        .char-counter.limit {
+            color: #dc3545;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #0077b5;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #005885;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-copy {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        .btn-copy:hover {
+            background: #5a6268;
+        }
+
+        .btn-copy.copied {
+            background: #28a745;
+        }
+
+        .message {
+            margin-top: 10px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+            white-space: pre-line;
+            line-height: 1.6;
+            text-align: left;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .url-type-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .url-type-badge.user {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .url-type-badge.company {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        /* Loading State */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #e0e0e0;
+            border-top-color: #0077b5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .loading-step {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Results Section */
+        .results-section {
+            display: none;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 60px;
+            height: 60px;
+            background: #0077b5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .profile-avatar.company {
+            background: #ef6c00;
+            border-radius: 10px;
+        }
+
+        .profile-info h3 {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .profile-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .email-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .email-card h4 {
+            font-size: 1rem;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .email-card h4 svg {
+            color: #0077b5;
+        }
+
+        .email-content {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #333;
+            white-space: pre-wrap;
+            min-height: 150px;
+        }
+
+        .email-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: flex-end;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .footer a {
+            color: #0077b5;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .url-input-group {
+                flex-direction: column;
+            }
+            
+            .email-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✉️ Cold Email Generator</h1>
+            <p>Generate hyper-personalized cold emails using LinkedIn data and AI</p>
+        </div>
+
+        <div class="content">
+            <div class="input-section">
+                <label for="profileUrl">LinkedIn URL</label>
+                <div class="hint">Enter a user profile or company page URL</div>
+                <div class="url-input-group">
+                    <input 
+                        type="text" 
+                        id="profileUrl" 
+                        class="url-input"
+                        placeholder="https://www.linkedin.com/in/username/ or /company/name/"
+                    >
+                </div>
+                <div id="urlTypeBadge"></div>
+                <div id="validationMessage" class="message"></div>
+            </div>
+
+            <div class="input-section">
+                <label for="productDescription">Product Description</label>
+                <div class="hint">Describe your product/service (100-200 characters required)</div>
+                <input 
+                    type="text" 
+                    id="productDescription" 
+                    class="product-input"
+                    placeholder="e.g., AI-powered sales automation tool that 3x your outbound response rates"
+                    minlength="100"
+                    maxlength="200"
+                >
+                <div id="charCounter" class="char-counter">0/200</div>
+            </div>
+
+            <button id="generateBtn" class="btn btn-primary" style="width: 100%;" disabled>
+                Generate Cold Email
+            </button>
+
+            <div id="resultsSection" class="results-section">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="profileAvatar">?</div>
+                    <div class="profile-info">
+                        <h3 id="profileName">Profile Name</h3>
+                        <p id="profileHeadline">Headline</p>
+                    </div>
+                </div>
+
+                <div class="email-card">
+                    <h4>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                        Generated Cold Email
+                    </h4>
+                    <div class="email-content" id="emailContent">
+                        Your personalized email will appear here...
+                    </div>
+                    <div class="email-actions">
+                        <button id="copyBtn" class="btn btn-copy">
+                            📋 Copy to Clipboard
+                        </button>
+                        <button id="regenerateBtn" class="btn btn-primary">
+                            🔄 Regenerate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 Cold Email Generator | Powered by AI | Connect with me on <b> <a href="https://linkedin.com/in/gowthammuraharirao" target="_blank">LinkedIn</a></b></p>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Generating your email...</div>
+        <div class="loading-step" id="loadingStep">Fetching LinkedIn data</div>
+    </div>
+
+    <script>
+        const profileUrlInput = document.getElementById('profileUrl');
+        const productDescInput = document.getElementById('productDescription');
+        const generateBtn = document.getElementById('generateBtn');
+        const validationMessage = document.getElementById('validationMessage');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingStep = document.getElementById('loadingStep');
+        const resultsSection = document.getElementById('resultsSection');
+        const urlTypeBadge = document.getElementById('urlTypeBadge');
+        const charCounter = document.getElementById('charCounter');
+
+        // URL validation patterns
+        const userPattern = /^https?:\/\/(www\.)?linkedin\.com\/in\/[\w\-]+\/?$/;
+        const companyPattern = /^https?:\/\/(www\.)?linkedin\.com\/company\/[\w\-]+\/?$/;
+
+        // Detect URL type
+        function getUrlType(url) {
+            if (userPattern.test(url)) return 'user';
+            if (companyPattern.test(url)) return 'company';
+            return null;
+        }
+
+        // Character counter for product description
+        productDescInput.addEventListener('input', function() {
+            const count = this.value.length;
+            charCounter.textContent = count + '/200';
+            
+            if (count >= 200) {
+                charCounter.className = 'char-counter limit';
+            } else if (count >= 180) {
+                charCounter.className = 'char-counter warning';
+            } else if (count < 100) {
+                charCounter.className = 'char-counter warning';
+            } else {
+                charCounter.className = 'char-counter';
+            }
+            
+            // Update button state
+            updateGenerateButtonState();
+        });
+
+        // Function to check if generation is allowed
+        function updateGenerateButtonState() {
+            const url = profileUrlInput.value.trim();
+            const product = productDescInput.value.trim();
+            const urlType = getUrlType(url);
+            const isUrlValid = urlType !== null;
+            const isProductValid = product.length >= 100 && product.length <= 200;
+            
+            generateBtn.disabled = !(isUrlValid && isProductValid);
+        }
+
+        // Validate URL on input
+        profileUrlInput.addEventListener('input', function() {
+            const url = this.value.trim();
+            
+            if (!url) {
+                this.classList.remove('valid', 'invalid');
+                validationMessage.className = 'message';
+                urlTypeBadge.innerHTML = '';
+                updateGenerateButtonState();
+                return;
+            }
+
+            const urlType = getUrlType(url);
+
+            if (urlType) {
+                this.classList.add('valid');
+                this.classList.remove('invalid');
+                validationMessage.className = 'message';
+                
+                if (urlType === 'user') {
+                    urlTypeBadge.innerHTML = '<span class="url-type-badge user">👤 Individual Profile</span>';
+                } else {
+                    urlTypeBadge.innerHTML = '<span class="url-type-badge company">🏢 Company Page</span>';
+                }
+            } else {
+                this.classList.add('invalid');
+                this.classList.remove('valid');
+                urlTypeBadge.innerHTML = '';
+                validationMessage.textContent = 'Please enter a valid LinkedIn URL:\n• User: https://linkedin.com/in/username/\n• Company: https://linkedin.com/company/name/';
+                validationMessage.className = 'message error';
+            }
+            
+            // Update button state
+            updateGenerateButtonState();
+        });
+
+        // Handle Enter key
+        profileUrlInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateBtn.click();
+            }
+        });
+
+        productDescInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateBtn.click();
+            }
+        });
+
+        // Store last used values for regenerate
+        let lastUrl = '';
+        let lastProduct = '';
+
+        // Generate button click
+        generateBtn.addEventListener('click', async function() {
+            const url = profileUrlInput.value.trim();
+            const product = productDescInput.value.trim();
+
+            // Validate URL
+            const urlType = getUrlType(url);
+            if (!urlType) {
+                validationMessage.textContent = 'Please enter a valid LinkedIn URL';
+                validationMessage.className = 'message error';
+                profileUrlInput.classList.add('invalid');
+                return;
+            }
+
+            // Validate product description
+            if (!product) {
+                validationMessage.textContent = 'Please enter a product description';
+                validationMessage.className = 'message error';
+                return;
+            }
+
+            // Store for regenerate
+            lastUrl = url;
+            lastProduct = product;
+
+            await generateEmail(url, product, urlType);
+        });
+
+        // Regenerate button
+        document.getElementById('regenerateBtn').addEventListener('click', async function() {
+            if (lastUrl && lastProduct) {
+                const urlType = getUrlType(lastUrl);
+                await generateEmail(lastUrl, lastProduct, urlType);
+            }
+        });
+
+        // Copy button
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            const emailContent = document.getElementById('emailContent').textContent;
+            navigator.clipboard.writeText(emailContent).then(() => {
+                this.textContent = '✅ Copied!';
+                this.classList.add('copied');
+                setTimeout(() => {
+                    this.textContent = '📋 Copy to Clipboard';
+                    this.classList.remove('copied');
+                }, 2000);
+            });
+        });
+
+        async function generateEmail(url, product, urlType) {
+            // Show loading
+            loadingOverlay.classList.add('active');
+            resultsSection.classList.remove('active');
+            generateBtn.disabled = true;
+
+            // Update loading steps
+            const steps = urlType === 'company' 
+                ? [
+                    'Fetching company data from LinkedIn...',
+                    'Analyzing company profile and mission...',
+                    'Crafting personalized B2B email...'
+                ]
+                : [
+                    'Fetching profile data from LinkedIn...',
+                    'Analyzing skills and experience...',
+                    'Crafting personalized cold email...'
+                ];
+
+            let stepIndex = 0;
+            loadingStep.textContent = steps[0];
+            const stepInterval = setInterval(() => {
+                stepIndex = (stepIndex + 1) % steps.length;
+                loadingStep.textContent = steps[stepIndex];
+            }, 2500);
+
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        url: url,
+                        product_description: product
+                    })
+                });
+
+                const data = await response.json();
+
+                clearInterval(stepInterval);
+
+                if (data.success) {
+                    displayResults(data, urlType);
+                    validationMessage.className = 'message';
+                } else {
+                    let errorMsg = data.error || 'Generation failed. Please try again.';
+                    if (data.details) {
+                        errorMsg += '\n\n' + data.details;
+                    }
+                    validationMessage.textContent = errorMsg;
+                    validationMessage.className = 'message error';
+                }
+            } catch (error) {
+                clearInterval(stepInterval);
+                validationMessage.textContent = 'Network error. Please check your connection and try again.';
+                validationMessage.className = 'message error';
+            } finally {
+                loadingOverlay.classList.remove('active');
+                generateBtn.disabled = false;
+            }
+        }
+
+        function displayResults(data, urlType) {
+            // Profile info
+            const name = data.profile?.name || 'Unknown';
+            document.getElementById('profileName').textContent = name;
+            document.getElementById('profileHeadline').textContent = data.profile?.headline || '';
+            
+            const avatar = document.getElementById('profileAvatar');
+            avatar.textContent = name.charAt(0).toUpperCase();
+            
+            if (urlType === 'company') {
+                avatar.classList.add('company');
+            } else {
+                avatar.classList.remove('company');
+            }
+
+            // Email content
+            document.getElementById('emailContent').textContent = data.email || 'No email generated.';
+
+            // Show results section
+            resultsSection.classList.add('active');
+
+            // Scroll to results
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

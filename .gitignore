@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-arg.txt
+.tox/
+.coverage
+.cache/
+.pytest_cache/
+htmlcov/
+dist/
+build/
+*.egg-info/
+.mypy_cache/
+.vscode/
+additional/
+projectDemoURL.txt
+
+# Flask
+instance/
+.webassets-cache/
+
+# Streamlit
+.streamlit/
+secrets.toml
+
+# Environment
+.env
+
+# Generated files
+AllFiles/
+Reports/*.pdf
+!Reports/.gitkeep
