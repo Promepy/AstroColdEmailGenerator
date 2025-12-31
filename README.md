@@ -74,3 +74,5 @@ Display personalized cold email
 - **LinkedIn Data**: Apify
 - **AI**: OpenAI GPT API
 - **Frontend**: Vanilla HTML/CSS/JS
+
+🎥 *Demo Video*: Watch the full product walkthrough on Loom → https://www.loom.com/share/1234567890abcdef
