@@ -75,4 +75,4 @@ Display personalized cold email
 - **AI**: OpenAI GPT API
 - **Frontend**: Vanilla HTML/CSS/JS
 
-🎥 *Demo Video*: Watch the full product walkthrough on Loom → https://www.loom.com/share/1234567890abcdef
+🎥 *Demo Video*: Watch the full product walkthrough on Loom → [https://www.loom.com/share/1234567890abcdef](https://www.loom.com/share/e03b9e3ce6ff4178be1884e9e2eb400d)
